@@ -9,13 +9,14 @@ jobs:
     hello:
         name: "Hello world"
         runs-on: ubuntu-latest
+        continue-on-error: true
         steps:
             - name: "step 1"
               run: echo "Hello world FROM Github Actions!"
-            - name: "Failed step"
+            - name: "Failed build step"
               # continue-on-error: true
               run: "bash -c 'exit 1'"
-            - name: "notification"
+            - name: "unit tests"
               run: "echo Previous step failed"
 
     notify:
