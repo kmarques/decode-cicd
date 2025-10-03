@@ -13,6 +13,7 @@ jobs:
             - name: "step 1"
               run: echo "Hello world FROM Github Actions!"
             - name: "Failed step"
+              continue-on-error: true
               run: "bash -c 'exit 1'"
             - name: "notification"
               run: "echo Previous step failed"
