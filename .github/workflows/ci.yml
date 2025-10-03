@@ -19,6 +19,7 @@ jobs:
               run: "echo Previous step failed"
 
     notify:
+        needs: ["hello"]
         name: "Notification center"
         runs-on: ubuntu-latest
         steps:
