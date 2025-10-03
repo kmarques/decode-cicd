@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Starting linters..."
+CONTENT=`npm run lint`
+if [[ 0 -ne $? ]]; then
+  echo "Check linters KO"
+  echo "$CONTENT"
+  exit 1
+else
+  echo "Check linters OK"
+fi
