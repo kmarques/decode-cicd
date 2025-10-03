@@ -40,15 +40,9 @@ exports.findOne = function(req, res) {
     });
 };
 
-exports.findLocation = function(req, res, next) {
+exports.findLocation = function(req, res) {
   var limit = req.query.limit || 10;
 
-      // get the max distance or set it to 8 kilometers
-      var maxDistance = req.query.distance || 8;
-
-      // we need to convert the distance to radians
-      // the raduis of Earth is approximately 6371 kilometers
-      maxDistance /= 6371;
 
       // get coordinates [ <longitude> , <latitude> ]
       var coords = [];
@@ -99,7 +93,7 @@ exports.update = function(req, res) {
 
 exports.delete = function(req, res) {
     // Delete a note with the specified noteId in the request
-    Location.remove({_id: req.params.noteId}, function(err, data) {
+    Location.remove({_id: req.params.noteId}, function(err) {
         if(err) {
             res.status(500).send({message: "Could not delete note with id " + req.params.id});
         } else {

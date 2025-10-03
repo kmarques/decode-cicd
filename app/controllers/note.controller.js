@@ -62,7 +62,7 @@ exports.update = function(req, res) {
 
 exports.delete = function(req, res) {
     // Delete a note with the specified noteId in the request
-    Note.remove({_id: req.params.noteId}, function(err, data) {
+    Note.remove({_id: req.params.noteId}, function(err) {
         if(err) {
             res.status(500).send({message: "Could not delete note with id " + req.params.id});
         } else {
