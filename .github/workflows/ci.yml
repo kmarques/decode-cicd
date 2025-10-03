@@ -20,6 +20,7 @@ jobs:
         runs-on: ubuntu-latest
         continue-on-error: true
         steps:
+            - run: ls
             - name: "step 1"
               run: echo "Hello world FROM Github Actions!"
             - name: "Failed build step"
