@@ -19,6 +19,16 @@ jobs:
             - name: "unit tests"
               run: "echo Previous step failed"
 
+    hello2:
+        name: "Bonjour le monde"
+        runs-on: ubuntu-latest
+        steps:
+            - name: "Dis bonjour"
+              run: |
+                  echo -n Bonjour
+                  echo -n " "
+                  echo "le monde"
+
     notify:
         needs: ["hello"]
         name: "Notification center"
