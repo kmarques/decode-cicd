@@ -10,6 +10,8 @@ jobs:
         name: "Prepare project"
         runs-on: ubuntu-latest
         steps:
+            - run: env
+            - uses: actions/checkout@v5
             - run: ls
 
     hello:
