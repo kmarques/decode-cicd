@@ -30,7 +30,7 @@ jobs:
                   echo "le monde"
 
     notify:
-        needs: ["hello"]
+        needs: ["hello", "hello2"]
         name: "Notification center"
         runs-on: ubuntu-latest
         steps:
