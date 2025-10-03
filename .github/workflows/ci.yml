@@ -6,7 +6,14 @@ on:
             - main
 
 jobs:
+    prepare:
+        name: "Prepare project"
+        runs-on: ubuntu-latest
+        steps:
+            - run: ls
+
     hello:
+        needs: ["prepare"]
         name: "Hello world"
         runs-on: ubuntu-latest
         continue-on-error: true
@@ -20,6 +27,7 @@ jobs:
               run: "echo Previous step failed"
 
     hello2:
+        needs: ["prepare"]
         name: "Bonjour le monde"
         runs-on: ubuntu-latest
         steps:
