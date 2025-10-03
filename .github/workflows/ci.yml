@@ -6,9 +6,44 @@ on:
             - main
 
 jobs:
-    hello:
-        name: "Hello world"
+    prepare:
+        name: "Prepare project"
         runs-on: ubuntu-latest
         steps:
+            - run: env
+            - uses: actions/checkout@v5
+            - run: ls
+
+    hello:
+        needs: ["prepare"]
+        name: "Hello world"
+        runs-on: ubuntu-latest
+        continue-on-error: true
+        steps:
+            - run: ls
             - name: "step 1"
               run: echo "Hello world FROM Github Actions!"
+            - name: "Failed build step"
+              # continue-on-error: true
+              run: "bash -c 'exit 1'"
+            - name: "unit tests"
+              run: "echo Previous step failed"
+
+    hello2:
+        needs: ["prepare"]
+        name: "Bonjour le monde"
+        runs-on: ubuntu-latest
+        steps:
+            - name: "Dis bonjour"
+              run: |
+                  echo -n Bonjour
+                  echo -n " "
+                  echo "le monde"
+
+    notify:
+        needs: ["hello", "hello2"]
+        name: "Notification center"
+        runs-on: ubuntu-latest
+        steps:
+            - name: "Discord"
+              run: "echo notify on discord"
