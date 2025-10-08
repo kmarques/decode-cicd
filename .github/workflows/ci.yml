@@ -16,11 +16,11 @@ jobs:
             ~/.npm
             ~/.cache
           key: ${{ runner.os }}-${{ runner.arch }}-npm-cache
+      - uses: actions/checkout@v5
       - uses: actions/cache@v4
         with:
           path: ./node_modules
           key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/checkout@v5
       - run: npm ci
 
   hello:
