@@ -89,6 +89,9 @@ jobs:
         # Run the service on the default port
         ports:
           - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: myuser
+          MONGO_INITDB_ROOT_PASSWORD: mypassword
 
     steps:
       - uses: actions/checkout@v5
