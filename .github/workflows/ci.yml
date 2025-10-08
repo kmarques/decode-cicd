@@ -10,6 +10,13 @@ jobs:
     name: "Prepare project"
     runs-on: ubuntu-latest
     steps:
+      - name: "Show variables"
+        run: |
+          echo "OS: $RUNNER_OS"
+          echo "ARCH: $RUNNER_ARCH"
+          echo "PORT: ${{ vars.PORT }}"
+          echo "MONGO_URL: ${{ secrets.MONGO_URL }}"
+
       - uses: actions/cache@v4
         with:
           path: |
