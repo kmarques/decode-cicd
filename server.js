@@ -41,6 +41,6 @@ require("./app/routes/note.routes.js")(app);
 require("./app/routes/location.routes.js")(app);
 
 // listen for requests
-app.listen(3000, function () {
-  console.log("Server is listening on port 3000");
+app.listen(process.env.PORT, function () {
+  console.log("Server is listening on port " + process.env.PORT);
 });
