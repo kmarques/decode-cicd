@@ -1,49 +1,58 @@
 name: "CI - DEV"
 
 on:
-    push:
-        branches-ignore:
-            - main
+  push:
+    branches-ignore:
+      - main
 
 jobs:
-    prepare:
-        name: "Prepare project"
-        runs-on: ubuntu-latest
-        steps:
-            - run: env
-            - uses: actions/checkout@v5
-            - run: ls
+  prepare:
+    name: "Prepare project"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+          key: ${{ runner.os }}-${{ runner.arch }}-npm-cache
+      - uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/checkout@v5
+      - run: npm ci
 
-    hello:
-        needs: ["prepare"]
-        name: "Hello world"
-        runs-on: ubuntu-latest
-        continue-on-error: true
-        steps:
-            - run: ls
-            - name: "step 1"
-              run: echo "Hello world FROM Github Actions!"
-            - name: "Failed build step"
-              # continue-on-error: true
-              run: "bash -c 'exit 1'"
-            - name: "unit tests"
-              run: "echo Previous step failed"
+  hello:
+    needs: ["prepare"]
+    name: "Hello world"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - run: ls
+      - name: "step 1"
+        run: echo "Hello world FROM Github Actions!"
+      - name: "Failed build step"
+        # continue-on-error: true
+        run: "bash -c 'exit 1'"
+      - name: "unit tests"
+        run: "echo Previous step failed"
 
-    hello2:
-        needs: ["prepare"]
-        name: "Bonjour le monde"
-        runs-on: ubuntu-latest
-        steps:
-            - name: "Dis bonjour"
-              run: |
-                  echo -n Bonjour
-                  echo -n " "
-                  echo "le monde"
+  hello2:
+    needs: ["prepare"]
+    name: "Bonjour le monde"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Dis bonjour"
+        run: |
+          echo -n Bonjour
+          echo -n " "
+          echo "le monde"
 
-    notify:
-        needs: ["hello", "hello2"]
-        name: "Notification center"
-        runs-on: ubuntu-latest
-        steps:
-            - name: "Discord"
-              run: "echo notify on discord"
+  notify:
+    needs: ["hello", "hello2"]
+    name: "Notification center"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Discord"
+        run: "echo notify on discord"
