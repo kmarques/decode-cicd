@@ -87,7 +87,10 @@ jobs:
         with:
           path: ./node_modules
           key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
-      - run: npm run test:functional
+      - run: env && npm run test:functional
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          PORT: ${{ vars.PORT }}
 
   e2e-tests:
     needs: ["lint"]
