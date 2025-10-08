@@ -1,5 +1,11 @@
-const { app, mongoose } = require("./app");
+const { app, mongoose } = require("../../app");
 const request = require("supertest");
+
+test("Server is running", async () => {
+  const response = await request(app).get("/");
+
+  expect(response.status).toBe(200);
+});
 
 test("Create a new note", async () => {
   const response = await request(app)
@@ -29,5 +35,6 @@ test("Failed to create a note with missing content", async () => {
 });
 
 afterAll(async () => {
+  console.log("Closing mongoose connection");
   await mongoose.connection.close();
 });

@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test:unit": "jest ./app",
-    "test:functional": "jest ./tests/functional",
+    "test:functional": "jest --detectOpenHandles ./tests/functional",
     "test:e2e": "jest ./tests/e2e",
     "lint": "eslint .",
     "lint:commit": "commitlint -e"

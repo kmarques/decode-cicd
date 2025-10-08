@@ -81,6 +81,15 @@ jobs:
     name: "Functional tests"
     runs-on: ubuntu-latest
     continue-on-error: true
+    services:
+      # Label used to access the service container
+      mongo:
+        # Docker Hub image
+        image: mongo:latest
+        # Run the service on the default port
+        ports:
+          - 27017:27017
+
     steps:
       - uses: actions/checkout@v5
       - uses: actions/cache/restore@v4

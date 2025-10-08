@@ -1,6 +1,5 @@
 var express = require("express");
 var bodyParser = require("body-parser");
-var process = require("node:process");
 
 // create express app
 var app = express();
@@ -23,7 +22,6 @@ mongoose.connect(dbConfig.url, {
 
 mongoose.connection.on("error", function () {
   console.log("Could not connect to the database. Exiting now...");
-  process.exit();
 });
 mongoose.connection.once("open", function () {
   console.log("Successfully connected to the database");
@@ -44,8 +42,3 @@ module.exports = {
   app,
   mongoose,
 };
-
-// listen for requests
-app.listen(process.env.PORT, function () {
-  console.log("Server is listening on port " + process.env.PORT);
-});

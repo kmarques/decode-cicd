@@ -1,6 +1,6 @@
 var Note = require("../models/note.model.js");
 
-exports.create = function (req, res) {
+exports.create = async function (req, res) {
   // Create and Save a new Note
   if (!req.body.content) {
     res.status(400).send({ message: "Note can not be empty" });
@@ -10,17 +10,15 @@ exports.create = function (req, res) {
     title: req.body.title || "Untitled Note",
     content: req.body.content,
   });
-
-  note.save(function (err, data) {
-    if (err) {
-      console.log(err);
-      res
-        .status(500)
-        .send({ message: "Some error occurred while creating the Note." });
-    } else {
-      res.status(201).send(data);
-    }
-  });
+  try {
+    await note.save();
+    res.status(201).send(note);
+  } catch (error) {
+    console.error("Error saving note:", error);
+    res
+      .status(500)
+      .send({ message: "Some error occurred while creating the Note." });
+  }
 };
 
 exports.findAll = function (req, res) {
@@ -40,11 +38,9 @@ exports.findOne = function (req, res) {
   // Find a single note with a noteId
   Note.findById(req.params.noteId, function (err, data) {
     if (err) {
-      res
-        .status(500)
-        .send({
-          message: "Could not retrieve note with id " + req.params.noteId,
-        });
+      res.status(500).send({
+        message: "Could not retrieve note with id " + req.params.noteId,
+      });
     } else {
       res.send(data);
     }
@@ -55,11 +51,9 @@ exports.update = function (req, res) {
   // Update a note identified by the noteId in the request
   Note.findById(req.params.noteId, function (err, note) {
     if (err) {
-      res
-        .status(500)
-        .send({
-          message: "Could not find a note with id " + req.params.noteId,
-        });
+      res.status(500).send({
+        message: "Could not find a note with id " + req.params.noteId,
+      });
     }
 
     note.title = req.body.title;
@@ -67,11 +61,9 @@ exports.update = function (req, res) {
 
     note.save(function (err, data) {
       if (err) {
-        res
-          .status(500)
-          .send({
-            message: "Could not update note with id " + req.params.noteId,
-          });
+        res.status(500).send({
+          message: "Could not update note with id " + req.params.noteId,
+        });
       } else {
         res.send(data);
       }
