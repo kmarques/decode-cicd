@@ -65,6 +65,7 @@ jobs:
           remote_host: ${{ secrets.REMOTE_HOST }}
           remote_user: ${{ secrets.REMOTE_USER }}
           remote_key: ${{ secrets.PRIVATE_KEY }}
+          remote_port: ${{ secrets.REMOTE_PORT }}
 
       - name: "Install SSH CONFIG"
         run: |
