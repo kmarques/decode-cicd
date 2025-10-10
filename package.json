@@ -4,9 +4,12 @@
   "description": "Never miss a thing in Life. Take notes quickly. Organize and keep track of all your notes.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:unit": "jest ./app",
+    "test:functional": "jest --detectOpenHandles ./tests/functional",
+    "test:e2e": "jest ./tests/e2e",
     "lint": "eslint .",
-    "lint:commit": "commitlint -e"
+    "lint:commit": "commitlint -e",
+    "build": "echo \"No build step\""
   },
   "keywords": [
     "Express",
@@ -28,6 +31,9 @@
     "@eslint/js": "^9.36.0",
     "commitlint": "^20.1.0",
     "eslint": "^9.36.0",
-    "globals": "^16.4.0"
+    "eslint-plugin-jest": "^29.0.1",
+    "globals": "^16.4.0",
+    "jest": "^30.2.0",
+    "supertest": "^7.1.4"
   }
 }

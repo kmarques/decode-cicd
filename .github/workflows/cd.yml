@@ -1,0 +1,91 @@
+name: "CD"
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["CI - DEV"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  prepare:
+    name: "Prepare project"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Show variables"
+        run: |
+          echo "OS: $RUNNER_OS"
+          echo "ARCH: $RUNNER_ARCH"
+          echo "PORT: ${{ vars.PORT }}"
+          echo "MONGO_URL: ${{ secrets.MONGO_URL }}"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+          key: ${{ runner.os }}-${{ runner.arch }}-npm-cache-prod
+      - uses: actions/checkout@v5
+      - uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}-prod
+      - run: npm install --only=production
+
+  build:
+    needs: ["prepare"]
+    name: "Build project"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}-prod
+      - run: npm run build
+
+  deploy:
+    needs: ["build"]
+    name: "Deploy project"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}-prod
+      - name: deploy sources to remote server
+        uses: burnett01/rsync-deployments@7.1.0
+        with:
+          switches: -avzr --delete --exclude .git --exclude .github --exclude tests
+          path: ./
+          remote_path: ~/${{ github.event.repository.name }}
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: "Install SSH CONFIG"
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{secrets.SSH_CONFIG}}" > ~/.ssh/config
+          echo "${{secrets.PUBLIC_KEY}}" > ~/.ssh/id_rsa.pub
+          echo "${{secrets.PRIVATE_KEY}}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/config
+
+      - name: "Restart server"
+        run: |
+          ssh freebox 'pm2 start ~/${{ github.event.repository.name }}/server.js --name ${{ github.event.repository.name }}'
+          ssh freebox 'pm2 save'
+          ssh freebox 'pm2 restart ${{ github.event.repository.name }}'
+
+  notify:
+    needs: ["deploy"]
+    name: "Notification center"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Discord"
+        run: "echo notify on discord"

@@ -1,49 +1,129 @@
 name: "CI - DEV"
 
 on:
-    push:
-        branches-ignore:
-            - main
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    prepare:
-        name: "Prepare project"
-        runs-on: ubuntu-latest
-        steps:
-            - run: env
-            - uses: actions/checkout@v5
-            - run: ls
+  prepare:
+    name: "Prepare project"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Show variables"
+        run: |
+          echo "OS: $RUNNER_OS"
+          echo "ARCH: $RUNNER_ARCH"
+          echo "PORT: ${{ vars.PORT }}"
+          echo "MONGO_URL: ${{ secrets.MONGO_URL }}"
 
-    hello:
-        needs: ["prepare"]
-        name: "Hello world"
-        runs-on: ubuntu-latest
-        continue-on-error: true
-        steps:
-            - run: ls
-            - name: "step 1"
-              run: echo "Hello world FROM Github Actions!"
-            - name: "Failed build step"
-              # continue-on-error: true
-              run: "bash -c 'exit 1'"
-            - name: "unit tests"
-              run: "echo Previous step failed"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache
+          key: ${{ runner.os }}-${{ runner.arch }}-npm-cache
+      - uses: actions/checkout@v5
+      - uses: actions/cache@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm install
 
-    hello2:
-        needs: ["prepare"]
-        name: "Bonjour le monde"
-        runs-on: ubuntu-latest
-        steps:
-            - name: "Dis bonjour"
-              run: |
-                  echo -n Bonjour
-                  echo -n " "
-                  echo "le monde"
+  lint:
+    needs: ["prepare"]
+    name: "Lint code"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm run lint
 
-    notify:
-        needs: ["hello", "hello2"]
-        name: "Notification center"
-        runs-on: ubuntu-latest
-        steps:
-            - name: "Discord"
-              run: "echo notify on discord"
+  hello-world:
+    needs: ["lint"]
+    name: "Hello world"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - run: ls
+      - name: "step 1"
+        run: echo "Hello world FROM Github Actions!"
+      - name: "Failed build step"
+        # continue-on-error: true
+        run: "bash -c 'exit 1'"
+      - name: "unit tests"
+        run: "echo Previous step failed"
+
+  unit-tests:
+    needs: ["lint"]
+    name: "Unit tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm run test:unit
+      - uses: actions/upload-artifact@v4
+        id: upload-coverage
+        with:
+          name: unit-tests
+          path: |
+            ./coverage
+      - run: echo \#${{ steps.upload-coverage.outputs.artifact-id }} ${{ steps.upload-coverage.outputs.artifact-url }}
+
+  functional-tests:
+    needs: ["lint"]
+    name: "Functional tests"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      # Label used to access the service container
+      mongo:
+        # Docker Hub image
+        image: mongo:latest
+        # Run the service on the default port
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: myuser
+          MONGO_INITDB_ROOT_PASSWORD: mypassword
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+      - run: env && npm run test:functional
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          PORT: ${{ vars.PORT }}
+
+  e2e-tests:
+    needs: ["lint"]
+    name: "E2E tests"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ runner.arch }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+      - run: npm run test:e2e
+
+  notify:
+    needs: ["unit-tests", "functional-tests", "e2e-tests"]
+    name: "Notification center"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Discord"
+        run: "echo notify on discord"
