@@ -76,8 +76,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           chmod 644 ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/config
+      - name: "Add remote to known hosts"
+        run: |
+          touch ~/.ssh/known_hosts
           ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+      - name: "Change permission"
+        run: chmod 644 ~/.ssh/known_hosts
+      - name: "Display remote host"
+        run: cat ~/.ssh/known_hosts
 
       - name: "Restart server"
         run: |
