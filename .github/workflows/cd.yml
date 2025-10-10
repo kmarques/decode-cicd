@@ -83,6 +83,32 @@ jobs:
           ssh -o StrictHostKeyChecking=no freebox 'pm2 save'
           ssh -o StrictHostKeyChecking=no freebox 'pm2 restart ${{ github.event.repository.name }}'
 
+  monitoring:
+    needs: ["deploy"]
+    name: "Monitoring center"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Install SSH CONFIG"
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{secrets.SSH_CONFIG}}" > ~/.ssh/config
+          echo "${{secrets.PUBLIC_KEY}}" > ~/.ssh/id_rsa.pub
+          echo "${{secrets.PRIVATE_KEY}}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/config
+      - name: "Check server started"
+        run: |
+          ssh -o StrictHostKeyChecking=no freebox 'pm2 status ${{ github.event.repository.name }}'
+      - name: Check application is running in localhost
+        run: |
+          ssh -o StrictHostKeyChecking=no freebox 'curl -I http://localhost:${{ vars.PORT }}'
+      - name: "Check application logs"
+        run: |
+          ssh -o StrictHostKeyChecking=no freebox 'pm2 logs ${{ github.event.repository.name }} --lines 20 --nostream'
+      - name: "Check server reachable from internet"
+        run: curl -I http://${{ secrets.REMOTE_HOST }}:${{ vars.PORT }}
+
   notify:
     needs: ["deploy"]
     name: "Notification center"
