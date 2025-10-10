@@ -8,7 +8,8 @@
     "test:functional": "jest --detectOpenHandles ./tests/functional",
     "test:e2e": "jest ./tests/e2e",
     "lint": "eslint .",
-    "lint:commit": "commitlint -e"
+    "lint:commit": "commitlint -e",
+    "build": "echo \"No build step\""
   },
   "keywords": [
     "Express",
