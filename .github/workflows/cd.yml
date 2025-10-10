@@ -76,20 +76,12 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           chmod 644 ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/config
-      - name: "Add remote to known hosts"
-        run: |
-          touch ~/.ssh/known_hosts
-          ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
-      - name: "Change permission"
-        run: chmod 644 ~/.ssh/known_hosts
-      - name: "Display remote host"
-        run: cat ~/.ssh/known_hosts
 
       - name: "Restart server"
         run: |
-          ssh freebox 'pm2 start ~/${{ github.event.repository.name }}/server.js --name ${{ github.event.repository.name }}'
-          ssh freebox 'pm2 save'
-          ssh freebox 'pm2 restart ${{ github.event.repository.name }}'
+          ssh -o StrictHostKeyChecking=no freebox 'pm2 start ~/${{ github.event.repository.name }}/server.js --name ${{ github.event.repository.name }}'
+          ssh -o StrictHostKeyChecking=no freebox 'pm2 save'
+          ssh -o StrictHostKeyChecking=no freebox 'pm2 restart ${{ github.event.repository.name }}'
 
   notify:
     needs: ["deploy"]
